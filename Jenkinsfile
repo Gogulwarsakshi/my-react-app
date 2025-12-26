@@ -2,41 +2,51 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "dockerhubusername/my-react-app"
-        CONTAINER_NAME = "react-app"
+        IMAGE_NAME = "sakshigogul/my-react-app"
+        CONTAINER_NAME = "my-react-app"
     }
 
     stages {
 
         stage('Build') {
             steps {
-                sh 'npm install'
-                sh 'npm run build'
+                echo 'Building application'
+                sh '''
+                  npm install
+                  npm run build
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test -- --watch=false || true'
+                echo 'Running tests'
+                sh '''
+                  npm test -- --watch=false || true
+                '''
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                echo 'Building Docker image'
+                sh '''
+                  docker build -t $IMAGE_NAME:latest .
+                '''
             }
         }
 
         stage('Push Image') {
             steps {
+                echo 'Pushing image to DockerHub'
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                    docker push $IMAGE_NAME:latest
+                      echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                      docker push $IMAGE_NAME:latest
                     '''
                 }
             }
@@ -44,12 +54,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
+                echo 'Deploying container'
                 sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                docker run -d --name $CONTAINER_NAME -p 3000:80 $IMAGE_NAME:latest
+                  docker rm -f $CONTAINER_NAME || true
+                  docker run -d -p 80:80 --name $CONTAINER_NAME $IMAGE_NAME:latest
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully 🎉'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
         }
     }
 }
