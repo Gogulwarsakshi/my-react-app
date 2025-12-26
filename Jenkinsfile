@@ -1,46 +1,55 @@
-stages {
+pipeline {
+    agent any
 
-    stage('Build') {
-        steps {
-            sh 'npm install'
-            sh 'npm run build'
-        }
+    environment {
+        IMAGE_NAME = "dockerhubusername/my-react-app"
+        CONTAINER_NAME = "react-app"
     }
 
-    stage('Test') {
-        steps {
-            sh 'npm test -- --watch=false || true'
-        }
-    }
+    stages {
 
-    stage('Docker Build') {
-        steps {
-            sh 'docker build -t my-react-app:latest .'
+        stage('Build') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+            }
         }
-    }
 
-    stage('Push Image') {
-        steps {
-            sh 'docker push my-react-app:latest'
+        stage('Test') {
+            steps {
+                sh 'npm test -- --watch=false || true'
+            }
         }
-    }
 
-    stage('Deploy') {
-        steps {
-            sh '''
-            docker stop react-app || true
-            docker rm react-app || true
-            docker run -d --name react-app -p 3000:80 my-react-app:latest
-            '''
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:latest .'
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+                docker run -d --name $CONTAINER_NAME -p 3000:80 $IMAGE_NAME:latest
+                '''
+            }
         }
     }
 }
-
-
-
-
-
-
-
-
-
