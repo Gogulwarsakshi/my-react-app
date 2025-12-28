@@ -44,21 +44,22 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
-            steps {
-                echo 'Pushing Docker image to DockerHub'
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                      echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                      docker push $IMAGE_NAME:latest
-                    '''
-                }
-            }
+       stage('Push Image') {
+    steps {
+        echo 'Pushing Docker image to DockerHub'
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-creds',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+            sh '''
+              echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+              docker push sakshigogul/my-react-app:latest
+            '''
         }
+    }
+}
+
 
         stage('Deploy') {
             steps {
