@@ -38,24 +38,16 @@ pipeline {
     steps {
         withSonarQubeEnv('sonarqube') {
             sh '''
-            echo "===== DEBUG INFO ====="
-            whoami
-            pwd
-            ls -la
-            echo "======================"
-
-            /opt/sonar-scanner/bin/sonar-scanner -X \
-            -Dsonar.projectKey=my-react-app \
-            -Dsonar.projectName=my-react-app \
-            -Dsonar.sources=src \
-            -Dsonar.projectBaseDir=$(pwd) \
-            -Dsonar.host.url=http://3.26.22.217:9000
+            sonar-scanner \
+              -Dsonar.projectKey=my-react-app \
+              -Dsonar.projectName=my-react-app \
+              -Dsonar.sources=src \
+              -Dsonar.host.url=http://54.253.20.211:9000 \
+              -Dsonar.login=${SONAR_TOKEN}
             '''
         }
     }
 }
-
-
 
         stage('Docker Build') {
             steps {
