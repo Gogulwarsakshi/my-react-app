@@ -34,23 +34,27 @@ pipeline {
             }
         }
 
-       stage('SonarQube Scan') {
+      stage('SonarQube Scan') {
     steps {
         withSonarQubeEnv('sonarqube') {
             sh '''
-            echo "Workspace:"
+            echo "===== DEBUG INFO ====="
+            whoami
             pwd
             ls -la
+            echo "======================"
 
-            /opt/sonar-scanner/bin/sonar-scanner \
+            /opt/sonar-scanner/bin/sonar-scanner -X \
             -Dsonar.projectKey=my-react-app \
             -Dsonar.projectName=my-react-app \
             -Dsonar.sources=src \
+            -Dsonar.projectBaseDir=$(pwd) \
             -Dsonar.host.url=http://3.26.22.217:9000
             '''
         }
     }
 }
+
 
 
         stage('Docker Build') {
