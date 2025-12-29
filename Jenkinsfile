@@ -36,7 +36,8 @@ pipeline {
 
        stage('SonarQube Scan') {
     steps {
-        withSonarQubeEnv('sonarqube-server') {
+        withSonarQubeEnv('sonarqube')
+ {
             sh '''
             /opt/sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=my-react-app \
