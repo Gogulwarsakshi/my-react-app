@@ -34,6 +34,18 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+  steps {
+    withSonarQubeEnv('sonarqube') {
+      sh '''
+        sonar-scanner \
+        -Dsonar.projectKey=my-react-app \
+        -Dsonar.sources=src \
+        -Dsonar.host.url=http://3.26.22.217:9000
+      '''
+    }
+  }
+}
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image'
