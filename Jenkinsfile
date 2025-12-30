@@ -44,7 +44,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarqube') {
                     sh '''
-                    sonar-scanner \
+                    /opt/sonar-scanner/bin/sonar-scanner \
                       -Dsonar.projectKey=my-react-app \
                       -Dsonar.projectName=my-react-app \
                       -Dsonar.sources=src \
@@ -57,7 +57,9 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh '''
+                docker build -t $IMAGE_NAME:latest .
+                '''
             }
         }
 
@@ -87,11 +89,11 @@ pipeline {
     }
 
     post {
-        failure {
-            echo '❌ Pipeline failed'
-        }
         success {
             echo '✅ Pipeline completed successfully'
+        }
+        failure {
+            echo '❌ Pipeline failed'
         }
     }
 }
