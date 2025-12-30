@@ -24,7 +24,6 @@ pipeline {
             steps {
                 echo 'Installing dependencies & building app'
                 sh '''
-                ls -la
                 node -v
                 npm -v
                 npm install
@@ -54,19 +53,15 @@ pipeline {
                 }
             }
         }
-stage('SonarQube Scan') {
-    steps {
-        withSonarQubeEnv('SonarQube') {
-            sh '''
-            sonar-scanner \
-            -Dsonar.projectKey=my-react-app \
-            -Dsonar.sources=src \
-            -Dsonar.host.url=http://<SONARQUBE-IP>:9000 \
-            -Dsonar.login=$SONAR_TOKEN
-            '''
+
+        stage('Quality Gate Check') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
         }
-    }
-}
+
         stage('Docker Build') {
             steps {
                 sh '''
@@ -105,7 +100,7 @@ stage('SonarQube Scan') {
             echo '✅ Pipeline completed successfully'
         }
         failure {
-            echo '❌ Pipeline failed'
+            echo '❌ Pipeline failed (Quality Gate or build issue)'
         }
     }
 }
