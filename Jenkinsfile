@@ -49,7 +49,7 @@ pipeline {
                       -Dsonar.projectName=my-react-app \
                       -Dsonar.sources=src \
                       -Dsonar.host.url=http://54.253.20.211:9000 \
-                      -Dsonar.login=${SONAR_TOKEN}
+                      -Dsonar.login=$SONAR_TOKEN
                     '''
                 }
             }
