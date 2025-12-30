@@ -54,7 +54,19 @@ pipeline {
                 }
             }
         }
-
+stage('SonarQube Scan') {
+    steps {
+        withSonarQubeEnv('SonarQube') {
+            sh '''
+            sonar-scanner \
+            -Dsonar.projectKey=my-react-app \
+            -Dsonar.sources=src \
+            -Dsonar.host.url=http://<SONARQUBE-IP>:9000 \
+            -Dsonar.login=$SONAR_TOKEN
+            '''
+        }
+    }
+}
         stage('Docker Build') {
             steps {
                 sh '''
